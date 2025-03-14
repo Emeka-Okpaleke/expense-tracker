@@ -31,3 +31,7 @@ A modern, responsive expense tracking application built with Next.js, MongoDB, a
    ```bash
    git clone https://github.com/yourusername/nextjs-expense-tracker.git
    cd nextjs-expense-tracker
+2. Install dependencies:
+   ```bash
+   npm install
+  
