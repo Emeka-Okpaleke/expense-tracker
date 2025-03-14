@@ -34,4 +34,13 @@ A modern, responsive expense tracking application built with Next.js, MongoDB, a
 2. Install dependencies:
    ```bash
    npm install
+3. Set up environment variables:
+   Create a `.env.local` file in the root directory with the following:
+   ```bash
+   MONGODB_URI=your_mongodb_connection_string
+4. Run the development server:
+   ```bash
+   npm run dev
+5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+   
   
