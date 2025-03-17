@@ -1,51 +1,111 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { connectToDatabase } from "@/lib/db"
-import Expense from "@/models/expense"
-import { format } from "date-fns"
+// import { type NextRequest, NextResponse } from "next/server"
+// import { connectToDatabase } from "@/lib/db"
+// import Expense from "@/models/expense"
+// import { format } from "date-fns"
 
-export async function GET(request: NextRequest) {
-  await connectToDatabase()
+// export async function GET(request: NextRequest) {
+//   await connectToDatabase()
 
-  const searchParams = request.nextUrl.searchParams
-  const exportFormat = searchParams.get("format") || "csv"
+//   const searchParams = request.nextUrl.searchParams
+//   const exportFormat = searchParams.get("format") || "csv"
+
+//   try {
+//     const expenses = await Expense.find().sort({ date: -1 })
+
+//     if (exportFormat === "json") {
+//       // Format the data for JSON export
+//       const formattedExpenses = expenses.map((expense: any) => ({
+//         id: expense._id.toString(),
+//         amount: expense.amount,
+//         category: expense.category,
+//         description: expense.description,
+//         date: format(new Date(expense.date), "yyyy-MM-dd"),
+//         createdAt: format(new Date(expense.createdAt), "yyyy-MM-dd HH:mm:ss"),
+//       }))
+
+//       return NextResponse.json(formattedExpenses)
+//     } else {
+//       // Format the data for CSV export
+//       const headers = ["Date", "Category", "Description", "Amount"]
+//       const rows = expenses.map((expense: any) => [
+//         format(new Date(expense.date), "yyyy-MM-dd"),
+//         expense.category,
+//         expense.description || "",
+//         expense.amount.toString(),
+//       ])
+
+//       const csvContent = [headers.join(","), ...rows.map((row) => row.map((cell) => `"${cell}"`).join(","))].join("\n")
+
+//       return new NextResponse(csvContent, {
+//         headers: {
+//           "Content-Type": "text/csv",
+//           "Content-Disposition": `attachment; filename="expenses-${format(new Date(), "yyyy-MM-dd")}.csv"`,
+//         },
+//       })
+//     }
+//   } catch (error) {
+//     console.error("Failed to export expenses:", error)
+//     return new NextResponse("Failed to export expenses", { status: 500 })
+//   }
+// }
+
+import { type NextRequest, NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/db";
+import Expense from "@/models/expense";
+import { format } from "date-fns";
+
+interface ExpenseType {
+  _id: string;
+  amount: number;
+  category: string;
+  description?: string;
+  date: string;
+  createdAt: string;
+}
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  await connectToDatabase();
+
+  const searchParams = request.nextUrl.searchParams;
+  const exportFormat = searchParams.get("format") || "csv";
 
   try {
-    const expenses = await Expense.find().sort({ date: -1 })
+    const expenses: ExpenseType[] = await Expense.find().sort({ date: -1 });
 
     if (exportFormat === "json") {
-      // Format the data for JSON export
-      const formattedExpenses = expenses.map((expense: any) => ({
+      const formattedExpenses = expenses.map((expense) => ({
         id: expense._id.toString(),
         amount: expense.amount,
         category: expense.category,
-        description: expense.description,
+        description: expense.description || "",
         date: format(new Date(expense.date), "yyyy-MM-dd"),
         createdAt: format(new Date(expense.createdAt), "yyyy-MM-dd HH:mm:ss"),
-      }))
+      }));
 
-      return NextResponse.json(formattedExpenses)
+      return NextResponse.json(formattedExpenses);
     } else {
-      // Format the data for CSV export
-      const headers = ["Date", "Category", "Description", "Amount"]
-      const rows = expenses.map((expense: any) => [
+      const headers = ["Date", "Category", "Description", "Amount"];
+      const rows = expenses.map((expense) => [
         format(new Date(expense.date), "yyyy-MM-dd"),
         expense.category,
         expense.description || "",
         expense.amount.toString(),
-      ])
+      ]);
 
-      const csvContent = [headers.join(","), ...rows.map((row) => row.map((cell) => `"${cell}"`).join(","))].join("\n")
+      const csvContent = [
+        headers.join(","),
+        ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+      ].join("\n");
 
       return new NextResponse(csvContent, {
         headers: {
           "Content-Type": "text/csv",
           "Content-Disposition": `attachment; filename="expenses-${format(new Date(), "yyyy-MM-dd")}.csv"`,
         },
-      })
+      });
     }
   } catch (error) {
-    console.error("Failed to export expenses:", error)
-    return new NextResponse("Failed to export expenses", { status: 500 })
+    console.error("Failed to export expenses:", error);
+    return new NextResponse("Failed to export expenses", { status: 500 });
   }
 }
-
